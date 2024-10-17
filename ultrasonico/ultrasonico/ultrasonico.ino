@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 
 // Replace with your network credentials
@@ -9,17 +10,18 @@ const char* password = "spotless.magnetic.bridge";
 // Replace with the API URL you want to call
 const char* apiEndpoint = "https://kn8k5rd1-3000.usw3.devtunnels.ms/api/test";
 
-WiFiClient wifiClient;
-
 #define PIN_TRIG D5
 #define PIN_ECHO D6
 
 void sendPOST(float distance) {
+
   // Make HTTP POST request
   if (WiFi.status() == WL_CONNECTED) {
+    WiFiClientSecure client;
+    client.setInsecure();
     HTTPClient http;
 
-    http.begin(wifiClient, apiEndpoint);  // Specify the URL
+    http.begin(client, apiEndpoint);  // Specify the URL
 
     // Specify content-type header (important for JSON payload)
     http.addHeader("Content-Type", "application/json");
@@ -42,7 +44,7 @@ void sendPOST(float distance) {
       Serial.println(httpCode);  // HTTP response code
       Serial.println(response);  // API response
     } else {
-      Serial.println("Error on HTTP request");
+      Serial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
     }
 
     http.end(); // Close the connection

@@ -1,14 +1,30 @@
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+async function storeDistance(distance: number, deviceId: number) {
+    const prisma = new PrismaClient();
+    const record = await prisma.movementRecord.create({
+        data: {
+            distance: distance,
+            deviceId: deviceId,
+        },
+    });
+    await prisma.$disconnect();
+    console.log('Stored distance:', record);
+}
 
 export async function POST(request: Request) {
     try {
         // Parse the JSON body
         const body = await request.json();
-        const { distance } = body;
+        const { distance, deviceId } = body;
 
-        // TODO: Store data in sql
+        console.log("Reciving distance:", distance);
 
-        return NextResponse.json({ success: true, data: { distance } });
+        storeDistance(distance, deviceId);
+
+
+        return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ success: false, error: 'Failed to process request' }, { status: 500 });
     }
