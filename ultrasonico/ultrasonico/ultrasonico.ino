@@ -10,13 +10,15 @@ const char* password = "spotless.magnetic.bridge";
 // Replace with the API URL you want to call
 const char* apiEndpoint = "";
 
-#define PIN_TRIG_1 D5
-#define PIN_ECHO_1 D6
-#define PIN_TRIG_2 D1
-#define PIN_ECHO_2 D2
+#define PIN_TRIG_1 D6 // 0 - right
+#define PIN_ECHO_1 D7
+#define PIN_TRIG_2 D2 // 1 - front
+#define PIN_ECHO_2 D3
+#define PIN_TRIG_3 D4 // 2 - left
+#define PIN_ECHO_3 D5
 
-uint8_t trigPins[] = {PIN_TRIG_1, PIN_TRIG_2};
-uint8_t echoPins[] = {PIN_ECHO_1, PIN_ECHO_2};
+uint8_t trigPins[] = {PIN_TRIG_1, PIN_TRIG_2, PIN_TRIG_3};
+uint8_t echoPins[] = {PIN_ECHO_1, PIN_ECHO_2, PIN_ECHO_3};
 
 void sendPOST(float distance, int deviceId) {
 
@@ -61,7 +63,7 @@ void sendPOST(float distance, int deviceId) {
 
 void setup() {
   Serial.begin(9600);
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 3; i++) {
     pinMode(trigPins[i], OUTPUT);
     pinMode(echoPins[i], INPUT);
   }
@@ -90,14 +92,16 @@ float ultrasonicRead(int index) {
 }
 
 void loop() {
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 3; i++) {
     float distance = ultrasonicRead(i);
+    Serial.print(i);
+    Serial.print(" - ");
     Serial.println(distance);
-    if (distance < 10) {
+    if (distance < 10 && distance > 0) {
       sendPOST(distance, i + 1);
       Serial.print("Movement detected on ");
       Serial.println(i);
     }
-  }
+  } 
     delay(500);
 }

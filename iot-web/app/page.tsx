@@ -9,16 +9,28 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch("https://kn8k5rd1-3000.usw3.devtunnels.ms/api/getReadings")
-      .then((response) => response.json())
-      .then((data) => {
-        setLastRecords(data.records); // Set records directly
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching records:", error);
-        setLoading(false);
-      });
+    const fetchData = () => {
+      fetch("https://kn8k5rd1-3000.usw3.devtunnels.ms/api/getReadings")
+        .then((response) => response.json())
+        .then((data) => {
+          setLastRecords(data.records);
+          setLoading(false)
+          console.log("Records fetched:", data.records);
+        })
+        .catch((error) => {
+          console.error("Error fetching records:", error);
+          setLoading(false);
+        });
+    };
+
+    // Fetch immediately on mount
+    fetchData();
+
+    // Set up polling interval (20 seconds = 20000 milliseconds)
+    const interval = setInterval(fetchData, 1000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -32,6 +44,7 @@ export default function Page() {
             <thead>
               <tr className="border-b border-gray-700">
                 <th className="p-2">ID</th>
+                <th className="p-2">Device</th>
                 <th className="p-2">Device ID</th>
                 <th className="p-2">Distance</th>
                 <th className="p-2">Date</th>
@@ -41,6 +54,7 @@ export default function Page() {
               {lastRecords.map((record) => (
                 <tr key={record.id} className="border-b border-gray-800">
                   <td className="p-2 text-center">{record.id}</td>
+                  <td className="p-2 text-center">{record.device}</td>
                   <td className="p-2 text-center">{record.deviceId}</td>
                   <td className="p-2 text-center">{record.distance}</td>
                   <td className="p-2 text-center">
